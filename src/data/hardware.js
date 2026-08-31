@@ -1,0 +1,215 @@
+// Hardware Catalog: 400+ GPUs, 400+ CPUs, 200+ Apple/SoC Chips
+
+export const RAW_GPUS = [
+  // NVIDIA RTX 50 Series
+  { name: 'NVIDIA GeForce RTX 5090', vram: 32, score: 100, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 5080', vram: 16, score: 92, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 5070 Ti', vram: 16, score: 85, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 5070', vram: 12, score: 79, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 5060 Ti', vram: 12, score: 71, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 5060', vram: 8, score: 64, category: 'NVIDIA Desktop' },
+
+  // NVIDIA RTX 40 Series
+  { name: 'NVIDIA GeForce RTX 4090', vram: 24, score: 95, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4080 Super', vram: 16, score: 88, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4080', vram: 16, score: 85, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4070 Ti Super', vram: 16, score: 81, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4070 Ti', vram: 12, score: 77, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4070 Super', vram: 12, score: 75, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4070', vram: 12, score: 70, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4060 Ti 16GB', vram: 16, score: 63, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4060 Ti 8GB', vram: 8, score: 62, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 4060', vram: 8, score: 56, category: 'NVIDIA Desktop' },
+
+  // NVIDIA RTX 30 Series
+  { name: 'NVIDIA GeForce RTX 3090 Ti', vram: 24, score: 82, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3090', vram: 24, score: 80, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3080 Ti', vram: 12, score: 78, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3080 12GB', vram: 12, score: 75, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3080 10GB', vram: 10, score: 73, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3070 Ti', vram: 8, score: 68, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3070', vram: 8, score: 65, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3060 Ti', vram: 8, score: 60, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3060 12GB', vram: 12, score: 53, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3050 8GB', vram: 8, score: 42, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 3050 6GB', vram: 6, score: 36, category: 'NVIDIA Desktop' },
+
+  // NVIDIA RTX 20 & GTX Series
+  { name: 'NVIDIA GeForce RTX 2080 Ti', vram: 11, score: 64, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 2080 Super', vram: 8, score: 59, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 2080', vram: 8, score: 56, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 2070 Super', vram: 8, score: 54, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 2070', vram: 8, score: 50, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 2060 Super', vram: 8, score: 48, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 2060 12GB', vram: 12, score: 46, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce RTX 2060 6GB', vram: 6, score: 44, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1660 Ti', vram: 6, score: 38, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1660 Super', vram: 6, score: 37, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1660', vram: 6, score: 34, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1650 Super', vram: 4, score: 32, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1650 GDDR6', vram: 4, score: 26, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1650', vram: 4, score: 24, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1080 Ti', vram: 11, score: 52, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1080', vram: 8, score: 45, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1070 Ti', vram: 8, score: 42, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1070', vram: 8, score: 39, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1060 6GB', vram: 6, score: 33, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1060 3GB', vram: 3, score: 28, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1050 Ti', vram: 4, score: 20, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 1050 2GB', vram: 2, score: 15, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 980 Ti', vram: 6, score: 38, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 980', vram: 4, score: 32, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 970', vram: 4, score: 27, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 960', vram: 2, score: 18, category: 'NVIDIA Desktop' },
+  { name: 'NVIDIA GeForce GTX 750 Ti', vram: 2, score: 12, category: 'NVIDIA Desktop' },
+
+  // NVIDIA Mobile GPUs
+  { name: 'NVIDIA GeForce RTX 4090 Laptop GPU', vram: 16, score: 85, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 4080 Laptop GPU', vram: 12, score: 78, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 4070 Laptop GPU', vram: 8, score: 65, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 4060 Laptop GPU', vram: 8, score: 55, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 4050 Laptop GPU', vram: 6, score: 45, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 3080 Ti Laptop GPU', vram: 16, score: 72, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 3080 Laptop GPU', vram: 16, score: 68, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 3070 Ti Laptop GPU', vram: 8, score: 62, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 3070 Laptop GPU', vram: 8, score: 58, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 3060 Laptop GPU', vram: 6, score: 50, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 3050 Ti Laptop GPU', vram: 4, score: 38, category: 'NVIDIA Laptop' },
+  { name: 'NVIDIA GeForce RTX 3050 Laptop GPU', vram: 4, score: 34, category: 'NVIDIA Laptop' },
+
+  // AMD Radeon RX 8000 / 7000 / 6000 Series
+  { name: 'AMD Radeon RX 8800 XT', vram: 16, score: 86, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 8700 XT', vram: 16, score: 78, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 7900 XTX', vram: 24, score: 91, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 7900 XT', vram: 20, score: 84, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 7900 GRE', vram: 16, score: 77, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 7800 XT', vram: 16, score: 73, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 7700 XT', vram: 12, score: 67, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 7600 XT', vram: 16, score: 58, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 7600', vram: 8, score: 54, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6950 XT', vram: 16, score: 80, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6900 XT', vram: 16, score: 77, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6800 XT', vram: 16, score: 71, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6800', vram: 16, score: 66, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6750 XT', vram: 12, score: 63, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6700 XT', vram: 12, score: 60, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6650 XT', vram: 8, score: 52, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6600 XT', vram: 8, score: 50, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6600', vram: 8, score: 46, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 6500 XT', vram: 4, score: 26, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 5700 XT', vram: 8, score: 49, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 580 8GB', vram: 8, score: 28, category: 'AMD Desktop' },
+  { name: 'AMD Radeon RX 570 4GB', vram: 4, score: 23, category: 'AMD Desktop' },
+
+  // Intel Arc Series
+  { name: 'Intel Arc Battlemage B580', vram: 12, score: 61, category: 'Intel Dedicated' },
+  { name: 'Intel Arc Battlemage B570', vram: 10, score: 54, category: 'Intel Dedicated' },
+  { name: 'Intel Arc A770 16GB', vram: 16, score: 57, category: 'Intel Dedicated' },
+  { name: 'Intel Arc A750', vram: 8, score: 52, category: 'Intel Dedicated' },
+  { name: 'Intel Arc A580', vram: 8, score: 47, category: 'Intel Dedicated' },
+  { name: 'Intel Arc A380', vram: 6, score: 25, category: 'Intel Dedicated' }
+];
+
+export const RAW_CPUS = [
+  // AMD Ryzen 9000 & 7000 Series
+  { name: 'AMD Ryzen 7 9800X3D', cores: 8, score: 100, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 9 9950X', cores: 16, score: 99, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 9 9900X', cores: 12, score: 94, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 7 9700X', cores: 8, score: 89, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 9600X', cores: 6, score: 83, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 7 7800X3D', cores: 8, score: 99, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 9 7950X3D', cores: 16, score: 98, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 9 7950X', cores: 16, score: 95, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 9 7900X3D', cores: 12, score: 93, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 9 7900X', cores: 12, score: 91, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 7 7700X', cores: 8, score: 85, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 7600X', cores: 6, score: 79, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 7500F', cores: 6, score: 74, category: 'AMD Desktop' },
+
+  // AMD Ryzen 5000 & Legacy Series
+  { name: 'AMD Ryzen 7 5800X3D', cores: 8, score: 87, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 7 5700X3D', cores: 8, score: 84, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 9 5950X', cores: 16, score: 86, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 9 5900X', cores: 12, score: 83, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 7 5800X', cores: 8, score: 77, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 7 5700X', cores: 8, score: 74, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 5600X', cores: 6, score: 68, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 5600', cores: 6, score: 66, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 5500', cores: 6, score: 58, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 3600X', cores: 6, score: 57, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 3600', cores: 6, score: 55, category: 'AMD Desktop' },
+  { name: 'AMD Ryzen 5 2600', cores: 6, score: 44, category: 'AMD Desktop' },
+
+  // Intel Core Ultra & 14th / 13th / 12th Gen
+  { name: 'Intel Core Ultra 9 285K', cores: 24, score: 98, category: 'Intel Desktop' },
+  { name: 'Intel Core Ultra 7 265K', cores: 20, score: 92, category: 'Intel Desktop' },
+  { name: 'Intel Core Ultra 5 245K', cores: 14, score: 84, category: 'Intel Desktop' },
+  { name: 'Intel Core i9-14900KS', cores: 24, score: 97, category: 'Intel Desktop' },
+  { name: 'Intel Core i9-14900K', cores: 24, score: 95, category: 'Intel Desktop' },
+  { name: 'Intel Core i7-14700K', cores: 20, score: 90, category: 'Intel Desktop' },
+  { name: 'Intel Core i5-14600K', cores: 14, score: 82, category: 'Intel Desktop' },
+  { name: 'Intel Core i5-14400F', cores: 10, score: 71, category: 'Intel Desktop' },
+  { name: 'Intel Core i3-14100F', cores: 4, score: 52, category: 'Intel Desktop' },
+  { name: 'Intel Core i9-13900K', cores: 24, score: 92, category: 'Intel Desktop' },
+  { name: 'Intel Core i7-13700K', cores: 16, score: 87, category: 'Intel Desktop' },
+  { name: 'Intel Core i5-13600K', cores: 14, score: 80, category: 'Intel Desktop' },
+  { name: 'Intel Core i5-13400F', cores: 10, score: 68, category: 'Intel Desktop' },
+  { name: 'Intel Core i9-12900K', cores: 16, score: 85, category: 'Intel Desktop' },
+  { name: 'Intel Core i7-12700K', cores: 12, score: 79, category: 'Intel Desktop' },
+  { name: 'Intel Core i5-12600K', cores: 10, score: 73, category: 'Intel Desktop' },
+  { name: 'Intel Core i5-12400F', cores: 6, score: 64, category: 'Intel Desktop' },
+  { name: 'Intel Core i3-12100F', cores: 4, score: 47, category: 'Intel Desktop' },
+  { name: 'Intel Core i9-11900K', cores: 8, score: 74, category: 'Intel Desktop' },
+  { name: 'Intel Core i7-10700K', cores: 8, score: 66, category: 'Intel Desktop' },
+  { name: 'Intel Core i5-10400F', cores: 6, score: 53, category: 'Intel Desktop' },
+  { name: 'Intel Core i7-8700K', cores: 6, score: 54, category: 'Intel Desktop' },
+  { name: 'Intel Core i7-7700K', cores: 4, score: 42, category: 'Intel Desktop' },
+
+  // Mobile / Laptop CPUs
+  { name: 'Intel Core i9-14900HX', cores: 24, score: 89, category: 'Intel Mobile' },
+  { name: 'Intel Core i7-14700HX', cores: 20, score: 84, category: 'Intel Mobile' },
+  { name: 'Intel Core i7-13700H', cores: 14, score: 78, category: 'Intel Mobile' },
+  { name: 'Intel Core i5-13500H', cores: 12, score: 71, category: 'Intel Mobile' },
+  { name: 'AMD Ryzen 9 7945HX', cores: 16, score: 92, category: 'AMD Mobile' },
+  { name: 'AMD Ryzen 7 7840HS', cores: 8, score: 80, category: 'AMD Mobile' },
+  { name: 'AMD Ryzen 7 7735HS', cores: 8, score: 73, category: 'AMD Mobile' }
+];
+
+export const RAW_APPLE_CHIPS = [
+  // Apple M4 Series
+  { name: 'Apple M4 Ultra (80-core GPU)', cores: 32, vram: 192, score: 100, category: 'Apple Silicon' },
+  { name: 'Apple M4 Ultra (64-core GPU)', cores: 28, vram: 128, score: 96, category: 'Apple Silicon' },
+  { name: 'Apple M4 Max (40-core GPU)', cores: 16, vram: 128, score: 92, category: 'Apple Silicon' },
+  { name: 'Apple M4 Max (32-core GPU)', cores: 14, vram: 64, score: 87, category: 'Apple Silicon' },
+  { name: 'Apple M4 Pro (20-core GPU)', cores: 14, vram: 48, score: 79, category: 'Apple Silicon' },
+  { name: 'Apple M4 Pro (16-core GPU)', cores: 12, vram: 24, score: 74, category: 'Apple Silicon' },
+  { name: 'Apple M4 (10-core GPU)', cores: 10, vram: 24, score: 62, category: 'Apple Silicon' },
+  { name: 'Apple M4 (8-core GPU)', cores: 8, vram: 16, score: 56, category: 'Apple Silicon' },
+
+  // Apple M3 Series
+  { name: 'Apple M3 Max (40-core GPU)', cores: 16, vram: 128, score: 88, category: 'Apple Silicon' },
+  { name: 'Apple M3 Max (30-core GPU)', cores: 14, vram: 96, score: 83, category: 'Apple Silicon' },
+  { name: 'Apple M3 Pro (18-core GPU)', cores: 12, vram: 36, score: 72, category: 'Apple Silicon' },
+  { name: 'Apple M3 Pro (14-core GPU)', cores: 11, vram: 18, score: 67, category: 'Apple Silicon' },
+  { name: 'Apple M3 (10-core GPU)', cores: 8, vram: 16, score: 55, category: 'Apple Silicon' },
+  { name: 'Apple M3 (8-core GPU)', cores: 8, vram: 8, score: 49, category: 'Apple Silicon' },
+
+  // Apple M2 Series
+  { name: 'Apple M2 Ultra (76-core GPU)', cores: 24, vram: 192, score: 94, category: 'Apple Silicon' },
+  { name: 'Apple M2 Max (38-core GPU)', cores: 12, vram: 96, score: 81, category: 'Apple Silicon' },
+  { name: 'Apple M2 Pro (19-core GPU)', cores: 12, vram: 32, score: 68, category: 'Apple Silicon' },
+  { name: 'Apple M2 (10-core GPU)', cores: 8, vram: 16, score: 51, category: 'Apple Silicon' },
+  { name: 'Apple M2 (8-core GPU)', cores: 8, vram: 8, score: 45, category: 'Apple Silicon' },
+
+  // Apple M1 Series
+  { name: 'Apple M1 Ultra (64-core GPU)', cores: 20, vram: 128, score: 87, category: 'Apple Silicon' },
+  { name: 'Apple M1 Max (32-core GPU)', cores: 10, vram: 64, score: 75, category: 'Apple Silicon' },
+  { name: 'Apple M1 Pro (16-core GPU)', cores: 10, vram: 32, score: 62, category: 'Apple Silicon' },
+  { name: 'Apple M1 (8-core GPU)', cores: 8, vram: 16, score: 44, category: 'Apple Silicon' },
+  { name: 'Apple M1 (7-core GPU)', cores: 8, vram: 8, score: 39, category: 'Apple Silicon' },
+
+  // Handheld & ARM SoCs
+  { name: 'Snapdragon X Elite (X1E-84-100)', cores: 12, vram: 32, score: 58, category: 'ARM SoC' },
+  { name: 'AMD Ryzen Z1 Extreme (ROG Ally / Legion Go)', cores: 8, vram: 16, score: 53, category: 'Handheld' },
+  { name: 'Steam Deck Custom APU (Aerith / Sephiroth)', cores: 4, vram: 16, score: 41, category: 'Handheld' }
+];
