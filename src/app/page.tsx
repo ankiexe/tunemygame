@@ -176,6 +176,7 @@ export default function LandingPage() {
   useEffect(() => {
     async function loadInitialHardwareAndGames() {
       if (!supabase) {
+        console.error('Supabase failed to load: missing client configuration');
         setIsPreloading(false);
         setLoading(false);
         return;
@@ -208,7 +209,7 @@ export default function LandingPage() {
         if (nextCpuList.length) setSelectedCpu(nextCpuList[0]);
         if (nextGameList.length) setSelectedGame(nextGameList[0]);
       } catch (error) {
-        console.error('Error preloading hardware and games:', error);
+        console.error('Supabase failed to load:', error);
       } finally {
         setIsPreloading(false);
         setLoading(false);
@@ -390,6 +391,10 @@ export default function LandingPage() {
   );
 
   const filteredGames = visibleGameOptions;
+
+  const gpuMenuOpen = gpuOpen && gpuSearch.trim().length > 0;
+  const cpuMenuOpen = cpuOpen && cpuSearch.trim().length > 0;
+  const gameMenuOpen = gameOpen && gameSearch.trim().length > 0;
 
   const telemetry = useMemo(() => {
     if (!selectedGpu || !selectedCpu || !selectedGame) {
@@ -611,81 +616,103 @@ export default function LandingPage() {
               <div className="absolute inset-0 opacity-80" style={{ background: selectedTheme.background }} />
               <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-[#05070B]/40" />
 
-              <div className="relative z-10">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-zinc-300">Selected Title</span>
-                  <span className="text-[10px] font-medium text-zinc-400">Verified {selectedGame?.storage_gb ?? '—'} GB</span>
-                </div>
+              {selectedGame ? (
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-zinc-300">Selected Title</span>
+                    <span className="text-[10px] font-medium text-zinc-400">Verified {selectedGame.storage_gb ?? '—'} GB</span>
+                  </div>
 
-                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    {selectedGame?.steam_appid ? (
-                      <img
-                        src={`https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${selectedGame.steam_appid}/header.jpg`}
-                        alt={selectedGame.name}
-                        className="h-full w-full object-cover"
-                        onError={() => setImageErrors((current) => ({ ...current, [selectedGame.name]: true }))}
-                      />
-                    ) : (
-                      <div className="h-full w-full" style={{ background: selectedTheme.posterFallback }} />
+                  <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      {selectedGame?.steam_appid ? (
+                        <img
+                          src={`https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${selectedGame.steam_appid}/header.jpg`}
+                          alt={selectedGame.name}
+                          className="h-full w-full object-cover"
+                          onError={() => setImageErrors((current) => ({ ...current, [selectedGame.name]: true }))}
+                        />
+                      ) : (
+                        <div className="h-full w-full" style={{ background: selectedTheme.posterFallback }} />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#05070B] via-[#05070B]/40 to-transparent" />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {selectedGame.directx_api && (
+                      <span className="inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200">
+                        {selectedGame.directx_api}
+                      </span>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#05070B] via-[#05070B]/40 to-transparent" />
+                    {selectedGame.storage_gb && (
+                      <span className="inline-flex items-center rounded-full border border-violet-500/30 bg-violet-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-200">
+                        {selectedGame.storage_gb} GB SSD
+                      </span>
+                    )}
+                    {telemetry && (
+                      <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                        Verified 60+ FPS
+                      </span>
+                    )}
                   </div>
-                </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {selectedGame?.directx_api && (
-                    <span className="inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200">
-                      {selectedGame.directx_api}
-                    </span>
-                  )}
-                  {selectedGame?.storage_gb && (
-                    <span className="inline-flex items-center rounded-full border border-violet-500/30 bg-violet-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-200">
-                      {selectedGame.storage_gb} GB SSD
-                    </span>
-                  )}
-                  {telemetry && (
-                    <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
-                      Verified 60+ FPS
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-6 border-t border-white/[0.08] pt-5">
-                  <div className="flex items-end justify-between gap-4">
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-400">Performance target</p>
-                      <h3 className="mt-2 text-3xl font-black tracking-tight text-white">{telemetry ? `${Math.round(telemetry.avgFps || 0)} FPS avg` : '82 FPS avg'}</h3>
+                  <div className="mt-6 border-t border-white/[0.08] pt-5">
+                    <div className="flex items-end justify-between gap-4">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-400">Performance target</p>
+                        <h3 className="mt-2 text-3xl font-black tracking-tight text-white">{telemetry ? `${Math.round(telemetry.avgFps || 0)} FPS avg` : 'Awaiting telemetry'}</h3>
+                      </div>
+                      {telemetry && (
+                        <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                          Butter Smooth
+                        </span>
+                      )}
                     </div>
-                    <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
-                      Butter Smooth
-                    </span>
+
+                    {telemetry && (
+                      <div className="mt-4 rounded-2xl border border-white/[0.07] bg-black/20 p-3">
+                        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-zinc-400">
+                          <span>Resolution target</span>
+                          <span className="text-zinc-200">1080p High</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-white/[0.07] bg-black/20 p-3">
-                    <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-zinc-400">
-                      <span>Resolution target</span>
-                      <span className="text-zinc-200">1080p High</span>
+                  <div className="mt-6 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setBrowsing(true)}
+                      className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-200 transition hover:border-cyan-500/60 hover:text-white"
+                    >
+                      Browse Catalog
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white shadow-[0_0_25px_rgba(99,102,241,0.45)] transition hover:brightness-110"
+                    >
+                      RT Benchmark
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative z-10 flex min-h-[520px] flex-col items-center justify-center text-center">
+                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] shadow-[0_0_40px_rgba(34,211,238,0.18)]">
+                    <div className="relative h-10 w-10">
+                      <div className="absolute inset-0 rounded-full border border-cyan-400/60" />
+                      <div className="absolute left-1/2 top-1/2 h-8 w-px -translate-x-1/2 -translate-y-1/2 bg-cyan-300/70" />
+                      <div className="absolute left-1/2 top-1/2 h-px w-8 -translate-x-1/2 -translate-y-1/2 bg-cyan-300/70" />
+                      <div className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300" />
                     </div>
                   </div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-zinc-400">Telemetry Idle</p>
+                  <h3 className="mt-4 text-2xl font-black tracking-tight text-white">Awaiting Hardware & Title Target</h3>
+                  <p className="mt-3 max-w-md text-sm leading-relaxed text-zinc-400">
+                    Select a GPU, CPU, and Game from the configurator to calculate real-time bottlenecks and frametime predictions.
+                  </p>
                 </div>
-
-                <div className="mt-6 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setBrowsing(true)}
-                    className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-200 transition hover:border-cyan-500/60 hover:text-white"
-                  >
-                    Browse Catalog
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white shadow-[0_0_25px_rgba(99,102,241,0.45)] transition hover:brightness-110"
-                  >
-                    RT Benchmark
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           </section>
 
@@ -722,8 +749,8 @@ export default function LandingPage() {
                       className="text-base font-medium placeholder:text-zinc-600 bg-transparent px-2 py-2 outline-none text-white w-full"
                     />
                   </div>
-                  {gpuOpen && (
-                    <div className="absolute inset-x-0 top-[calc(100%+0.5rem)] z-50 w-full bg-[#0B0F17]/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-72 overflow-y-auto p-1.5">
+                  {gpuMenuOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#0a0d14] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto">
                       {filteredGpus.length > 0 ? (
                         filteredGpus.slice(0, 30).map((gpu) => (
                           <button
@@ -766,8 +793,8 @@ export default function LandingPage() {
                       className="text-base font-medium placeholder:text-zinc-600 bg-transparent px-2 py-2 outline-none text-white w-full"
                     />
                   </div>
-                  {cpuOpen && (
-                    <div className="absolute inset-x-0 top-[calc(100%+0.5rem)] z-50 w-full bg-[#0B0F17]/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-72 overflow-y-auto p-1.5">
+                  {cpuMenuOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#0a0d14] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto">
                       {filteredCpus.length > 0 ? (
                         filteredCpus.slice(0, 30).map((cpu) => (
                           <button
@@ -810,8 +837,8 @@ export default function LandingPage() {
                       className="text-base font-medium placeholder:text-zinc-600 bg-transparent px-2 py-2 outline-none text-white w-full"
                     />
                   </div>
-                  {gameOpen && (
-                    <div className="absolute inset-x-0 top-[calc(100%+0.5rem)] z-50 w-full bg-[#0B0F17]/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-72 overflow-y-auto p-1.5">
+                  {gameMenuOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#0a0d14] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto">
                       {isSearchingGames ? (
                         <div className="px-3 py-2 text-xs text-cyan-300 animate-pulse">Searching catalog...</div>
                       ) : filteredGames.length > 0 ? (
