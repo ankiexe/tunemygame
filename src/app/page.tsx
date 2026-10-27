@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import DiagnosticCard from '@/components/DiagnosticCard';
+import RabbitCompanion from '@/components/RabbitCompanion';
 import { calculateTelemetry } from '@/lib/telemetry-engine';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -123,23 +124,28 @@ const sortAlphabetical = <T extends { name: string }>(items: T[]): T[] => {
 };
 
 export default function LandingPage() {
-  const diagnosticsRef = useRef<HTMLDivElement>(null);
+  const cpuRef = useRef<HTMLDivElement>(null);
+  const gpuRef = useRef<HTMLDivElement>(null);
+  const gameRef = useRef<HTMLDivElement>(null);
   const [onboardingStep, setOnboardingStep] = useState<'story' | 'rig-select' | 'dashboard'>('story');
-  const [isPreloading, setIsPreloading] = useState(true);
   const [gpuList, setGpuList] = useState<any[]>([]);
   const [cpuList, setCpuList] = useState<any[]>([]);
+  const [gpuResults, setGpuResults] = useState<any[] | null>(null);
+  const [cpuResults, setCpuResults] = useState<any[] | null>(null);
   const [gameList, setGameList] = useState<any[]>([]);
   const [selectedGpu, setSelectedGpu] = useState<any | null>(null);
   const [selectedCpu, setSelectedCpu] = useState<any | null>(null);
   const [selectedGame, setSelectedGame] = useState<any | null>(null);
   const [selectedRam, setSelectedRam] = useState<number>(16);
-  const [loading, setLoading] = useState(true);
   const [activeRig, setActiveRig] = useState<'potato' | 'pc' | 'apple'>('pc');
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [gameSearch, setGameSearch] = useState('');
   const [isSearchingGames, setIsSearchingGames] = useState(false);
   const [gpuSearch, setGpuSearch] = useState('');
   const [cpuSearch, setCpuSearch] = useState('');
+  const cpuSearchRequest = useRef(0);
+  const gpuSearchRequest = useRef(0);
+  const gameSearchRequest = useRef(0);
 
   const handleRigSelect = (rig: 'potato' | 'pc' | 'apple') => {
     setActiveRig(rig);
@@ -150,21 +156,18 @@ export default function LandingPage() {
   const [cpuOpen, setCpuOpen] = useState(false);
   const [browsing, setBrowsing] = useState(false);
 
-  // Close dropdowns when clicking outside
+  // Close each dropdown independently when clicking outside its combobox.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (diagnosticsRef.current && !diagnosticsRef.current.contains(event.target as Node)) {
-        setGameOpen(false);
-        setGpuOpen(false);
-        setCpuOpen(false);
-      }
+      const target = event.target as Node;
+      if (cpuRef.current && !cpuRef.current.contains(target)) setCpuOpen(false);
+      if (gpuRef.current && !gpuRef.current.contains(target)) setGpuOpen(false);
+      if (gameRef.current && !gameRef.current.contains(target)) setGameOpen(false);
     };
 
-    if (gameOpen || gpuOpen || cpuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [gameOpen, gpuOpen, cpuOpen]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const ramOptions = useMemo(() => {
     if (activeRig === 'apple') return APPLE_RAM_OPTIONS;
@@ -172,99 +175,164 @@ export default function LandingPage() {
     return PC_RAM_OPTIONS;
   }, [activeRig]);
 
-  // Preload all hardware and games immediately on mount
+  // Search Supabase directly; select complete rows because diagnostics use hardware stats.
+  const searchCpus = useCallback(async (query: string) => {
+    if (!supabase) return;
+    const requestId = ++cpuSearchRequest.current;
+    let dbQuery = supabase.from('hardware_cpus').select('*');
+
+    if (activeRig === 'apple') dbQuery = dbQuery.ilike('brand', 'apple');
+    if (query.trim()) dbQuery = dbQuery.ilike('name', `%${query.trim()}%`);
+
+    const { data, error } = await dbQuery
+      .order('name', { ascending: true })
+      .limit(query.trim() ? 30 : 20);
+
+    if (error) {
+      console.error('CPU search error:', error);
+      return;
+    }
+    if (requestId === cpuSearchRequest.current) setCpuResults(data ?? []);
+  }, [activeRig]);
+
+  const searchGpus = useCallback(async (query: string) => {
+    if (!supabase) return;
+    const requestId = ++gpuSearchRequest.current;
+    let dbQuery = supabase.from('hardware_gpus').select('*');
+
+    if (activeRig === 'apple') dbQuery = dbQuery.ilike('brand', 'apple');
+    if (query.trim()) dbQuery = dbQuery.ilike('name', `%${query.trim()}%`);
+
+    const { data, error } = await dbQuery
+      .order('name', { ascending: true })
+      .limit(query.trim() ? 30 : 20);
+
+    if (error) {
+      console.error('GPU search error:', error);
+      return;
+    }
+    if (requestId === gpuSearchRequest.current) setGpuResults(data ?? []);
+  }, [activeRig]);
+
+  const searchGames = useCallback(async (query: string) => {
+    if (!supabase) {
+      console.error('Games load error: Supabase client is not configured');
+      return;
+    }
+
+    const requestId = ++gameSearchRequest.current;
+    setIsSearchingGames(true);
+    try {
+      let dbQuery = supabase.from('games').select('*');
+
+      if (activeRig === 'potato') {
+        dbQuery = dbQuery.eq('is_potato', true);
+      } else if (activeRig === 'apple') {
+        dbQuery = dbQuery.eq('is_mac', true).in('mac_support_type', ['native', 'rosetta']);
+        dbQuery = dbQuery.order('mac_support_type', { ascending: false });
+      } else if (activeRig === 'pc') {
+        dbQuery = dbQuery.eq('is_pc', true);
+      }
+
+      if (query.trim()) dbQuery = dbQuery.ilike('name', `%${query.trim()}%`);
+
+      const { data, error } = await dbQuery
+        .order('name', { ascending: true })
+        .limit(query.trim() ? 60 : 50);
+
+      if (error) {
+        console.error('Games search error:', error);
+        return;
+      }
+      if (requestId !== gameSearchRequest.current) return;
+
+      const nextGameList = sortAlphabetical(data ?? []);
+      setGameList(nextGameList);
+      if (nextGameList.length) {
+        setSelectedGame((current) =>
+          !current || !nextGameList.some((game) => game.name === current.name)
+            ? nextGameList[0]
+            : current
+        );
+      }
+    } catch (error) {
+      if (requestId === gameSearchRequest.current) console.error('Critical games search failure:', error);
+    } finally {
+      if (requestId === gameSearchRequest.current) setIsSearchingGames(false);
+    }
+  }, [activeRig]);
+
   useEffect(() => {
-    async function loadInitialHardwareAndGames() {
+    const timer = setTimeout(() => {
+      void searchCpus(cpuSearch);
+      void searchGpus(gpuSearch);
+    }, 120);
+
+    return () => {
+      clearTimeout(timer);
+      cpuSearchRequest.current += 1;
+      gpuSearchRequest.current += 1;
+    };
+  }, [cpuSearch, gpuSearch, searchCpus, searchGpus]);
+
+  // Load the complete hardware catalogs once so rig changes only filter in-memory data.
+  useEffect(() => {
+    let isCurrent = true;
+
+    async function loadHardwareCatalogs() {
       if (!supabase) {
         console.error('Supabase failed to load: missing client configuration');
-        setIsPreloading(false);
-        setLoading(false);
         return;
       }
 
       try {
-        const [gpuResult, cpuResult, gameResult] = await Promise.all([
+        const [
+          { data: gpus, error: gpuErr },
+          { data: cpus, error: cpuErr },
+        ] = await Promise.all([
           supabase.from('hardware_gpus').select('*').order('name', { ascending: true }),
           supabase.from('hardware_cpus').select('*').order('name', { ascending: true }),
-          supabase.from('games').select('*').order('name', { ascending: true }).limit(200),
         ]);
 
-        const gpusData = gpuResult.data ?? [];
-        const cpusData = cpuResult.data ?? [];
-        const gamesData = gameResult.data ?? [];
+        if (gpuErr) console.error('GPU load error:', gpuErr);
+        if (cpuErr) console.error('CPU load error:', cpuErr);
+        if (!isCurrent) return;
 
-        console.log('Fetched GPUs:', gpusData.length, gpuResult.error);
-        console.log('Fetched CPUs:', cpusData.length, cpuResult.error);
-        console.log('Fetched Games:', gamesData.length, gameResult.error);
-
-        const nextGpuList = sortAlphabetical(gpusData);
-        const nextCpuList = sortAlphabetical(cpusData);
-        const nextGameList = sortAlphabetical(gamesData);
-
-        setGpuList(nextGpuList);
-        setCpuList(nextCpuList);
-        setGameList(nextGameList);
-
-        if (nextGpuList.length) setSelectedGpu(nextGpuList[0]);
-        if (nextCpuList.length) setSelectedCpu(nextCpuList[0]);
-        if (nextGameList.length) setSelectedGame(nextGameList[0]);
+        if (gpus) {
+          const nextGpuList = sortAlphabetical(gpus);
+          setGpuList(nextGpuList);
+          setSelectedGpu((current) => current ?? nextGpuList[0] ?? null);
+        }
+        if (cpus) {
+          const nextCpuList = sortAlphabetical(cpus);
+          setCpuList(nextCpuList);
+          setSelectedCpu((current) => current ?? nextCpuList[0] ?? null);
+        }
       } catch (error) {
-        console.error('Supabase failed to load:', error);
-      } finally {
-        setIsPreloading(false);
-        setLoading(false);
+        if (isCurrent) console.error('Critical hardware catalog loader failure:', error);
       }
     }
 
-    loadInitialHardwareAndGames();
+    void loadHardwareCatalogs();
+
+    return () => {
+      isCurrent = false;
+    };
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      setIsSearchingGames(true);
-
-      try {
-        if (!supabase) return;
-
-        const queryText = gameSearch.trim();
-        let dbQuery = supabase.from('games').select('*');
-
-        if (activeRig === 'potato') {
-          dbQuery = dbQuery.or('is_potato.eq.true,storage_gb.lte.30');
-        } else if (activeRig === 'apple') {
-          dbQuery = dbQuery.eq('is_mac', true).in('mac_support_type', ['native', 'rosetta']);
-        } else if (activeRig === 'pc') {
-          dbQuery = dbQuery.eq('is_pc', true);
-        }
-
-        const maybeQuery = queryText
-          ? dbQuery.ilike('name', `%${queryText}%`)
-          : dbQuery;
-
-        const { data, error } = await maybeQuery
-          .order('name', { ascending: true })
-          .limit(60);
-
-        console.log('Game search results:', data?.length ?? 0, error);
-
-        const nextGameList = sortAlphabetical(data ?? []);
-        setGameList(nextGameList);
-
-        if (nextGameList.length && (!selectedGame || !nextGameList.some((game) => game.name === selectedGame.name))) {
-          setSelectedGame(nextGameList[0]);
-        }
-      } finally {
-        setIsSearchingGames(false);
-      }
-    }, 120);
-
-    return () => clearTimeout(timer);
-  }, [gameSearch, activeRig]);
+    const timer = setTimeout(() => void searchGames(gameSearch), 120);
+    return () => {
+      clearTimeout(timer);
+      gameSearchRequest.current += 1;
+    };
+  }, [gameSearch, searchGames]);
 
   const filteredGpuOptions = useMemo(() => {
-    if (!gpuList.length) return [];
+    const source = gpuResults ?? gpuList;
+    if (!source.length) return [];
 
-    const filtered = gpuList.filter((gpu) => {
+    const filtered = source.filter((gpu) => {
       const brand = normalizeBrand(gpu.brand ?? gpu.vendor ?? '');
       const name = (gpu.name ?? '');
       const isMatch = matchesSearch(name, gpuSearch);
@@ -283,12 +351,13 @@ export default function LandingPage() {
     });
 
     return sortAlphabetical(filtered).slice(0, 40);
-  }, [activeRig, gpuList, gpuSearch]);
+  }, [activeRig, gpuList, gpuResults, gpuSearch]);
 
   const filteredCpuOptions = useMemo(() => {
-    if (!cpuList.length) return [];
+    const source = cpuResults ?? cpuList;
+    if (!source.length) return [];
 
-    const filtered = cpuList.filter((cpu) => {
+    const filtered = source.filter((cpu) => {
       const brand = normalizeBrand(cpu.brand ?? cpu.vendor ?? '');
       const name = (cpu.name ?? '');
       const isMatch = matchesSearch(name, cpuSearch);
@@ -306,7 +375,7 @@ export default function LandingPage() {
     });
 
     return sortAlphabetical(filtered).slice(0, 40);
-  }, [activeRig, cpuList, cpuSearch]);
+  }, [activeRig, cpuList, cpuResults, cpuSearch]);
 
   const visibleGameOptions = useMemo(() => {
     if (!gameList.length) return [];
@@ -392,9 +461,9 @@ export default function LandingPage() {
 
   const filteredGames = visibleGameOptions;
 
-  const gpuMenuOpen = gpuOpen && gpuSearch.trim().length > 0;
-  const cpuMenuOpen = cpuOpen && cpuSearch.trim().length > 0;
-  const gameMenuOpen = gameOpen && gameSearch.trim().length > 0;
+  const gpuMenuOpen = gpuOpen;
+  const cpuMenuOpen = cpuOpen;
+  const gameMenuOpen = gameOpen;
 
   const telemetry = useMemo(() => {
     if (!selectedGpu || !selectedCpu || !selectedGame) {
@@ -575,6 +644,7 @@ export default function LandingPage() {
   // Main Dashboard
   return (
     <main className="bg-[#05070B] min-h-screen text-zinc-100 font-sans relative overflow-x-hidden selection:bg-cyan-500 selection:text-black">
+      <RabbitCompanion />
       <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)', backgroundSize: '32px 32px' }} />
 
       {selectedGame && (
@@ -732,7 +802,7 @@ export default function LandingPage() {
               </div>
 
               <div className="mt-5 space-y-3">
-                <div className="relative w-full rounded-2xl bg-black/40 border border-white/[0.07] focus-within:border-cyan-500/80 focus-within:shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all duration-300 p-1">
+                <div ref={gpuRef} className="relative w-full rounded-2xl bg-black/40 border border-white/[0.07] focus-within:border-cyan-500/80 focus-within:shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all duration-300 p-1">
                   <div className="flex items-center gap-3 bg-transparent px-3 py-2">
                     <span className="inline-flex items-center rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-200">[GPU]</span>
                     <input
@@ -751,7 +821,11 @@ export default function LandingPage() {
                   </div>
                   {gpuMenuOpen && (
                     <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#0a0d14] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto">
-                      {filteredGpus.length > 0 ? (
+                      {(gpuResults ?? gpuList).length === 0 ? (
+                        <div className="px-3 py-2 text-xs text-cyan-300" role="status">
+                          Loading hardware catalog...
+                        </div>
+                      ) : filteredGpus.length > 0 ? (
                         filteredGpus.slice(0, 30).map((gpu) => (
                           <button
                             key={gpu.id || gpu.name}
@@ -776,7 +850,7 @@ export default function LandingPage() {
                   )}
                 </div>
 
-                <div className="relative w-full rounded-2xl bg-black/40 border border-white/[0.07] focus-within:border-cyan-500/80 focus-within:shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all duration-300 p-1">
+                <div ref={cpuRef} className="relative w-full rounded-2xl bg-black/40 border border-white/[0.07] focus-within:border-cyan-500/80 focus-within:shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all duration-300 p-1">
                   <div className="flex items-center gap-3 bg-transparent px-3 py-2">
                     <span className="inline-flex items-center rounded-full bg-violet-500/10 border border-violet-500/30 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-200">[CPU]</span>
                     <input
@@ -795,7 +869,11 @@ export default function LandingPage() {
                   </div>
                   {cpuMenuOpen && (
                     <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#0a0d14] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto">
-                      {filteredCpus.length > 0 ? (
+                      {(cpuResults ?? cpuList).length === 0 ? (
+                        <div className="px-3 py-2 text-xs text-cyan-300" role="status">
+                          Loading hardware catalog...
+                        </div>
+                      ) : filteredCpus.length > 0 ? (
                         filteredCpus.slice(0, 30).map((cpu) => (
                           <button
                             key={cpu.id || cpu.name}
@@ -820,7 +898,7 @@ export default function LandingPage() {
                   )}
                 </div>
 
-                <div className="relative w-full rounded-2xl bg-black/40 border border-white/[0.07] focus-within:border-cyan-500/80 focus-within:shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all duration-300 p-1">
+                <div ref={gameRef} className="relative w-full rounded-2xl bg-black/40 border border-white/[0.07] focus-within:border-cyan-500/80 focus-within:shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all duration-300 p-1">
                   <div className="flex items-center gap-3 bg-transparent px-3 py-2">
                     <span className="inline-flex items-center rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-200">[GAME]</span>
                     <input
